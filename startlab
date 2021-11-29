@@ -1,4 +1,6 @@
-[[ $USER =~ m(.*) ]]
+#!/bin/bash
+
+[[ $USER =~ -(.*) ]]
 username=${BASH_REMATCH[1]}
 if [ -d $1 ]
 then
