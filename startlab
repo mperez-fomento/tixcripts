@@ -20,7 +20,10 @@ if [ ! -f $HOME/.gitlabctl.yaml ]
 then
   gitlabctl login -H https://gitlab.gototic.com -u $username
 fi
-gitlabctl new project $1
-gitlabctl new member root --from-project $1 --access-level 40
+if [ ! -n $(gitlabctl get projects | grep $username/$1)]
+then
+  gitlabctl new project $1
+  gitlabctl new member root --from-project $username/$1 --access-level 40
+fi
 git remote add origin https://gitlab.gototic.com/$username/$1.git
 git push -u origin main
