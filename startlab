@@ -1,0 +1,24 @@
+[[ $USER =~ m(.*) ]]
+username=${BASH_REMATCH[1]}
+if [ -d $1 ]
+then
+  echo "Ya tienes una carpeta llamada $1. Si continúas, perderás todo su contenido." 
+  read -p "¿Estás seguro de que quieres continuar (S/n)? " -n 1 -r
+  if [[ ! $REPLY =~ ^[Ss]$ ]]
+  then
+    [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+  fi
+  rm -rf $1
+fi
+print "\n"
+git clone https://gitlab.gototic.com/root/$1.git
+cd $1
+git remote remove origin
+if [ ! -f $HOME/.gitlabctl.yaml]
+then
+  gitlabctl login -H https://gitlab.gototic.com -u $username
+fi
+gitlabctl new project $1
+gitlabctl new member root --from-project $1 --access-level 1
+git remote add origin https://gitlab.gototic.com/$username/$1.git
+git push -u origin main
