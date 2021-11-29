@@ -1,7 +1,27 @@
 #!/bin/bash
 
+cd $HOME
+
+if [[ -z $1 ]]
+then
+  printf "Debes proporcionar el nombre de la práctica que quieres empezar.\n"
+  printf "Por ejemplo: startlab lab10603\n"
+  printf "Consulta el nombre de la práctica en Schoology.\n"
+  [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
+
 [[ $USER =~ -(.*) ]]
 username=${BASH_REMATCH[1]}
+
+if [[ -z $(git config --global user.name) ]]
+then
+  git config --global user.name "$username"
+fi
+if [[ -z $(git config --global user.email) ]]
+then
+  git config --global user.email "$username@gototicmail.com"
+fi
+
 if [ -d $1 ]
 then
   echo "Ya tienes una carpeta llamada $1. Si continúas, perderás todo su contenido." 
@@ -12,18 +32,29 @@ then
   fi
   rm -rf $1
 fi
+
 print "\n"
 git clone https://gitlab.gototic.com/root/$1.git
 cd $1
 git remote remove origin
+
 if [ ! -f $HOME/.gitlabctl.yaml ]
 then
   gitlabctl login -H https://gitlab.gototic.com -u $username
 fi
+
 if [[ -z $(gitlabctl get projects | grep $username/$1) ]]
 then
   gitlabctl new project $1
   gitlabctl new member root --from-project $username/$1 --access-level 40
 fi
+
 git remote add origin https://gitlab.gototic.com/$username/$1.git
 git push -u origin main
+
+printf "Ya tienes la práctica $1 descargada y puedes empezar a trabajar en ella.\n"
+printf "En Visual Studio Code, selecciona la opción 'Open folder', y elige la carpeta $HOME/$1\n"
+printf "\n"
+printf "Para ejecutar el programa, en este terminal, escribe 'runprogram', o 'rp'.\n"
+printf "Para probar si el programa funciona como debería, escribe 'testprogram', o 'tp'.\n"
+printf "Cuando el programa funcione correctamente, ejectura 'submitlab' en la consola para entregarlo.\n"

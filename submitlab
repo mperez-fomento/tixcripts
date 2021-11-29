@@ -25,3 +25,4 @@ else
   printf "Ha habido problemas al entregar la práctica $reponame.\n"
   printf "La práctica $reponame no ha sido entregada.\n"
   printf "Consulta con el profesor."
+fi
