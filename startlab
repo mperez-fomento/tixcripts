@@ -16,7 +16,7 @@ print "\n"
 git clone https://gitlab.gototic.com/root/$1.git
 cd $1
 git remote remove origin
-if [ ! -f $HOME/.gitlabctl.yaml]
+if [ ! -f $HOME/.gitlabctl.yaml ]
 then
   gitlabctl login -H https://gitlab.gototic.com -u $username
 fi
