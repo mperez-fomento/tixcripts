@@ -27,7 +27,7 @@ then
 fi
 if [[ "$(git push --porcelain)" == *"Done"* ]]
 then
-  printf "\n${green}Has entregado la práctica $reponame.${end}\n"
+  printf "\n${grn}Has entregado la práctica $reponame.${end}\n"
   printf "Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n"
 else
   printf "\nHa habido problemas al entregar la práctica $reponame.\n"
