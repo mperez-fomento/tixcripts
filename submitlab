@@ -6,7 +6,7 @@ if [ ! -z $1 ]
 then
   cd $HOME/$1
 fi
-if [! git rev-parse --is-inside-work-tree ]
+if [ ! git rev-parse --is-inside-work-tree ]
 then
   printf "La carpeta seleccionada no es una práctica. Si no indicaste el nombre de la práctica al ejecutar el commando 'submit', vuelve a ejecutarlo indicando el nombre de la práctica que quieres entregar. Por ejemplo: 'submitlab lab10602'\n"
   [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
@@ -17,7 +17,7 @@ then
   git add .
   git commit -m "Submit lab"
 fi
-if [ "$(git push --porcelain)" == *"Done"* ]
+if [[ "$(git push --porcelain)" == *"Done"* ]]
 then
   printf "Has entregado la práctica $reponame.\n"
   printf "Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git"
