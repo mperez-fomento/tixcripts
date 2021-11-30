@@ -17,7 +17,7 @@ then
   git add .
   git commit -m "Submit lab"
 fi
-if [ $(git push) ]
+if [ "$(git push --porcelain)" == *"Done"* ]
 then
   printf "Has entregado la práctica $reponame.\n"
   printf "Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git"
