@@ -52,7 +52,7 @@ fi
 git remote add origin https://gitlab.gototic.com/$username/$1.git
 git push -u origin main
 
-printf "Ya tienes la práctica $1 descargada y puedes empezar a trabajar en ella.\n"
+printf "\nYa tienes la práctica $1 descargada y puedes empezar a trabajar en ella.\n"
 printf "En Visual Studio Code, selecciona la opción 'Open folder', y elige la carpeta $HOME/$1\n"
 printf "\n"
 printf "Para ejecutar el programa, en este terminal, escribe 'runprogram', o 'rp'.\n"
