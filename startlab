@@ -2,6 +2,8 @@
 
 cd $HOME
 
+# Check if there is an argument with the name of the lab.
+# If not, exit.
 if [[ -z $1 ]]
 then
   printf "Debes proporcionar el nombre de la práctica que quieres empezar.\n"
@@ -13,6 +15,8 @@ fi
 [[ $USER =~ -(.*) ]]
 username=${BASH_REMATCH[1]}
 
+# Check if user.name and user.email are configured.
+# If not, set them.
 if [[ -z $(git config --global user.name) ]]
 then
   git config --global user.name "$username"
@@ -22,6 +26,8 @@ then
   git config --global user.email "$username@gototicmail.com"
 fi
 
+# Check if there is already a folder with the lab's name,
+# and warn the user of data lost in case of proceeding.
 if [ -d $1 ]
 then
   echo "Ya tienes una carpeta llamada $1. Si continúas, perderás todo su contenido." 
@@ -33,22 +39,26 @@ then
   rm -rf $1
 fi
 
-print "\n"
+# Clone the remote repo.
+printf "\n"
 git clone https://gitlab.gototic.com/root/$1.git
 cd $1
 git remote remove origin
 
+# Perform login if not previously done.
 if [ ! -f $HOME/.gitlabctl.yaml ]
 then
   gitlabctl login -H https://gitlab.gototic.com -u $username
 fi
 
+# Create a new remote project and add root as a member.
 if [[ -z $(gitlabctl get projects | grep $username/$1) ]]
 then
   gitlabctl new project $1
   gitlabctl new member root --from-project $username/$1 --access-level 40
 fi
 
+# Add new remote project as origin for local repo.
 git remote add origin https://gitlab.gototic.com/$username/$1.git
 git push -u origin main
 
