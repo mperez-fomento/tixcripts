@@ -1,19 +1,28 @@
 #!/bin/bash
 
+red=$'\e[1;31m'
+grn=$'\e[1;32m'
+yel=$'\e[1;33m'
+blu=$'\e[1;34m'
+mag=$'\e[1;35m'
+cyn=$'\e[1;36m'
+end=$'\e[0m'
+
 cd $HOME
 
 # Check if there is an argument with the name of the lab.
 # If not, exit.
 if [[ -z $1 ]]
 then
-  printf "Debes proporcionar el nombre de la práctica que quieres empezar.\n"
-  printf "Por ejemplo: startlab lab10603\n"
-  printf "Consulta el nombre de la práctica en Schoology.\n"
+  printf "\n${red}ERROR: Debes proporcionar el nombre de la práctica que quieres empezar.${end}\n\n"
+  printf "${yel}Por ejemplo: startlab lab10603\n${end}"
+  printf "${yel}Consulta el nombre de la práctica en Schoology.${end}\n"
   [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
 [[ $USER =~ -(.*) ]]
-username=${BASH_REMATCH[1]}
+# username=${BASH_REMATCH[1]}
+username=test04
 
 # Check if user.name and user.email are configured.
 # If not, set them.
@@ -26,12 +35,20 @@ then
   git config --global user.email "$username@gototicmail.com"
 fi
 
+# Perform login if not previously done.
+if [ ! -f $HOME/.gitlabctl.yaml ]
+then
+  printf "\n\n${yel}Hemos detectado que es la primera vez que descargas una práctica.${end}\n"
+  printf "${yel}Se te pedirá la contraseña de tu usuario de gitlab...${end}\n\n"
+  gitlabctl login -H https://gitlab.gototic.com -u $username
+fi
+
 # Check if there is already a folder with the lab's name,
 # and warn the user of data lost in case of proceeding.
 if [ -d $1 ]
 then
-  echo "Ya tienes una carpeta llamada $1. Si continúas, perderás todo su contenido." 
-  read -p "¿Estás seguro de que quieres continuar (S/n)? " -n 1 -r
+  printf "\n${red}Ya tienes una carpeta llamada $1.${end}\n\n${yel}Si continúas, perderás todo su contenido.${end}\n" 
+  read -p "${yel}¿Estás seguro de que quieres continuar (S/n)?${end} " -n 1 -r
   if [[ ! $REPLY =~ ^[Ss]$ ]]
   then
     [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
@@ -40,18 +57,17 @@ then
 fi
 
 # Clone the remote repo.
-printf "\n"
-git clone https://gitlab.gototic.com/root/$1.git
+printf "\n\n${grn}Descargando la práctica $1...${end}\n\n"
+if ! git clone https://gitlab.gototic.com/root/$1.git
+then
+  printf "${red}\n\nERROR: No se ha encontrado la práctica $1.${end} \n${yel}Revisa si has escrito bien el nombre de la práctica.${end}\n\n"
+  [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
+
 cd $1
 git remote remove origin
 
-# Perform login if not previously done.
-if [ ! -f $HOME/.gitlabctl.yaml ]
-then
-  gitlabctl login -H https://gitlab.gototic.com -u $username
-fi
-
-# Create a new remote project and add root as a member.
+# Create a new remote project if it doesn't exist, and add root as a member.
 if [[ -z $(gitlabctl get projects | grep $username/$1) ]]
 then
   gitlabctl new project $1
@@ -59,12 +75,18 @@ then
 fi
 
 # Add new remote project as origin for local repo.
+printf "\n\n${grn}Vamos a sincronizar tu copia local de la práctica con tu copia remota.${end}\n"
+printf "\n${yel}Se te pedirá tu nombre de usuario y tu contraseña de gitlab.${end}\n\n"
 git remote add origin https://gitlab.gototic.com/$username/$1.git
-git push -u origin main
+if ! git push -u origin main
+then
+  printf "${red}\n\nERROR: No se ha podido sincronizar los repositorios local y remoto.${end}\n\n${yel}Revisa si has escrito bien tu usuario y contraseña y vuelve a intentarlo.${end}\n\n"
+  [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
 
-printf "\nYa tienes la práctica $1 descargada y puedes empezar a trabajar en ella.\n"
+printf "\n\n${grn}Ya tienes la práctica $1 descargada y puedes empezar a trabajar en ella.\n\n"
 printf "En Visual Studio Code, selecciona la opción 'Open folder', y elige la carpeta $HOME/$1\n"
 printf "\n"
 printf "Para ejecutar el programa, en este terminal, escribe 'runprogram', o 'rp'.\n"
 printf "Para probar si el programa funciona como debería, escribe 'testprogram', o 'tp'.\n"
-printf "Cuando el programa funcione correctamente, ejectura 'submitlab' en la consola para entregarlo.\n"
+printf "Cuando el programa funcione correctamente, ejecuta 'submitlab' en la consola para entregarlo.${end}\n"

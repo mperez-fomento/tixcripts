@@ -20,7 +20,8 @@ fi
 # Check if inside a repo
 if [[ ! $(git rev-parse --is-inside-work-tree) == *"true"* ]]
 then
-  printf "${red}La carpeta seleccionada no es una práctica${end}. Si no indicaste el nombre de la práctica al ejecutar el commando 'submit', vuelve a ejecutarlo indicando el nombre de la práctica que quieres entregar. Por ejemplo: 'submitlab lab10602'\n"
+  printf "\n\n${red}ERROR: La carpeta seleccionada no es una práctica${end}.\n\n"
+  printf "${yel}Si no indicaste el nombre de la práctica al ejecutar el commando 'submit', vuelve a ejecutarlo indicando el nombre de la práctica que quieres entregar. Por ejemplo: 'submitlab lab10602'\n\n${end}"
   [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
@@ -36,10 +37,10 @@ fi
 # Perform a git push and check if it's successful
 if [[ "$(git push --porcelain)" == *"Done"* ]]
 then
-  printf "\n${grn}Has entregado la práctica $reponame.${end}\n"
-  printf "Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n"
+  printf "\n${grn}Has entregado la práctica $reponame.${end}\n\n"
+  printf "${blu}Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n${end}"
 else
-  printf "\nHa habido problemas al entregar la práctica $reponame.\n"
-  printf "${red}La práctica $reponame no ha sido entregada.${end}\n"
-  printf "Consulta con el profesor.\n\n"
+  printf "${red}La práctica $reponame no ha sido entregada.${end}\n\n"
+  printf "\n${yel}Ha habido problemas al entregar la práctica $reponame.\n"
+  printf "Consulta con el profesor.${end}\n\n"
 fi
