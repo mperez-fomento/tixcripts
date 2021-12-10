@@ -14,7 +14,12 @@ username=${BASH_REMATCH[1]}
 # if argument given, cd into it. Otherwise, use current folder
 if [ ! -z $1 ]
 then
-  cd $HOME/$1
+  if ! cd $HOME/$1
+  then
+    printf "\n\n${red}ERROR: la existe ningún repositorio local llamado $1.\n\n${end}"
+    printf "${yel}Revisa si has escrito bien el nombre.\n"
+    [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+  fi
 fi
 
 # Check if inside a repo
@@ -39,8 +44,9 @@ if [[ "$(git push --porcelain)" == *"Done"* ]]
 then
   printf "\n${grn}Has entregado la práctica $reponame.${end}\n\n"
   printf "${blu}Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n${end}"
+  printf "${blu}Puedes volver a entregarla ejecutando submitlab $reponame en el terminal.\n"
 else
-  printf "${red}La práctica $reponame no ha sido entregada.${end}\n\n"
+  printf "${red}ERROR: La práctica $reponame no ha sido entregada.${end}\n\n"
   printf "\n${yel}Ha habido problemas al entregar la práctica $reponame.\n"
-  printf "Consulta con el profesor.${end}\n\n"
+  printf "\nAsegúrate de haber escrito bien tu usuario y contraseña de gitlab.\n"
 fi
