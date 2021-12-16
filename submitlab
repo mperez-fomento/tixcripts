@@ -26,11 +26,30 @@ fi
 if [[ ! $(git rev-parse --is-inside-work-tree) == *"true"* ]]
 then
   printf "\n\n${red}ERROR: La carpeta seleccionada no es una práctica${end}.\n\n"
-  printf "${yel}Si no indicaste el nombre de la práctica al ejecutar el commando 'submit', vuelve a ejecutarlo indicando el nombre de la práctica que quieres entregar. Por ejemplo: 'submitlab lab10602'\n\n${end}"
+  printf "${yel}Si no indicaste el nombre de la práctica al ejecutar el commando 'submitlab', vuelve a ejecutarlo indicando el nombre de la práctica que quieres entregar. Por ejemplo: 'submitlab lab10602'\n\n${end}"
   [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
 reponame=$(basename $(git rev-parse --show-toplevel))
+
+# Check if user.name and user.email are configured.
+# If not, set them.
+if [[ -z $(git config --global user.name) ]]
+then
+  git config --global user.name "$username"
+fi
+if [[ -z $(git config --global user.email) ]]
+then
+  git config --global user.email "$username@gototicmail.com"
+fi
+
+# Perform login if not previously done.
+if [ ! -f $HOME/.gitlabctl.yaml ]
+then
+  printf "\n\n${yel}Hemos detectado que es la primera vez que te conectas a gitlab.${end}\n"
+  printf "${yel}Se te pedirá la contraseña de tu usuario de gitlab...${end}\n\n"
+  gitlabctl login -H https://gitlab.gototic.com -u $username
+fi
 
 # Check if repo is up-to-date
 if [ -n "$(git status --porcelain)" ]
@@ -39,14 +58,44 @@ then
   git commit -m "Submit lab"
 fi
 
-# Perform a git push and check if it's successful
-if [[ "$(git push --porcelain)" == *"Done"* ]]
+# Create a new remote project if it doesn't exist, and add root as a member.
+if [[ -z $(gitlabctl get projects | grep $username/$reponame) ]]
 then
-  printf "\n${grn}Has entregado la práctica $reponame.${end}\n\n"
-  printf "${blu}Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n${end}"
-  printf "${blu}Puedes volver a entregarla ejecutando submitlab $reponame en el terminal.\n"
+  gitlabctl new project $reponame
+  gitlabctl new member root --from-project $username/$reponame --access-level 40
+  if [[ -n "$(git remote | grep origin)" ]]
+  then
+    git remote remove origin
+  fi
+  # Add new remote project as origin for local repo.
+  printf "\n\n${grn}Vamos a sincronizar tu copia local de la práctica con tu copia remota.${end}\n"
+  printf "\n${yel}Se te pedirá tu nombre de usuario y tu contraseña de gitlab.${end}\n\n"
+  git remote add origin https://gitlab.gototic.com/$username/$reponame.git
+  # Perform a git push and check if it's successful
+  if ! git push -u origin main
+  then
+    printf "${red}ERROR: La práctica $reponame no ha sido entregada.${end}\n\n"
+    printf "\n${yel}Ha habido problemas al entregar la práctica $reponame.\n"
+    printf "\nAsegúrate de haber escrito bien tu usuario y contraseña de gitlab.\n"
+    [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+  else
+    printf "\n${grn}Has entregado la práctica $reponame.${end}\n\n"
+    printf "${blu}Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n${end}"
+    printf "${blu}Puedes volver a entregarla ejecutando submitlab $reponame en el terminal.\n"
+  fi
 else
-  printf "${red}ERROR: La práctica $reponame no ha sido entregada.${end}\n\n"
-  printf "\n${yel}Ha habido problemas al entregar la práctica $reponame.\n"
-  printf "\nAsegúrate de haber escrito bien tu usuario y contraseña de gitlab.\n"
+  # Perform a git push and check if it's successful
+  if [[ "$(git push --porcelain)" == *"Done"* ]]
+  then
+    printf "\n${grn}Has entregado la práctica $reponame.${end}\n\n"
+    printf "${blu}Puedes ver el código entregado en https://gitlab.gototic.com/$username/$reponame.git\n${end}"
+    printf "${blu}Puedes volver a entregarla ejecutando submitlab $reponame en el terminal.\n"
+  else
+    printf "${red}ERROR: La práctica $reponame no ha sido entregada.${end}\n\n"
+    printf "\n${yel}Ha habido problemas al entregar la práctica $reponame.\n"
+    printf "\nAsegúrate de haber escrito bien tu usuario y contraseña de gitlab.\n"
+  fi
 fi
+
+
+
