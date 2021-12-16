@@ -1,5 +1,33 @@
 #!/bin/bash
 
+# if argument given, cd into it. Otherwise, use current folder
+if [ ! -z $1 ]
+then
+  if ! cd $HOME/$1
+  then
+    printf "\n\n${red}ERROR: no existe ninguna práctica llamada $1.\n\n${end}"
+    printf "${yel}Revisa si has escrito bien el nombre de la práctica.\n"
+    [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+  fi
+fi
+
+# Check if inside a repo
+if [[ ! $(git rev-parse --is-inside-work-tree) == *"true"* ]]
+then
+  printf "\n\n${red}ERROR: La carpeta seleccionada no es una práctica${end}.\n\n"
+  printf "${yel}Escribe el nombre de la práctica que quieres ejecutar: ${end}"
+  read reponame
+else
+  reponame=$(basename $(git rev-parse --show-toplevel))
+fi
+
+if ! cd $HOME/$reponame
+then
+  printf "\n\n${red}ERROR: No encuentro la práctica ${reponame} en tu ordenador${end}.\n\n"
+  [[ $0 = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
+
+
 [ -d build ] || mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX="../" ..
