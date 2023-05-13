@@ -1,0 +1,9 @@
++-----+---------------+----------------------------------------------+--------------+------+
+| ID  |     PATH      |                     URL                      | ISSUES COUNT | TAGS |
++-----+---------------+----------------------------------------------+--------------+------+
+| 317 | b129/lab11002 | https://gitlab.gototic.com/b129/lab11002.git |            0 |      |
+| 303 | b129/lab11001 | https://gitlab.gototic.com/b129/lab11001.git |            0 |      |
+| 152 | b129/lab10703 | https://gitlab.gototic.com/b129/lab10703.git |            0 |      |
+|  51 | b129/lab40309 | https://gitlab.gototic.com/b129/lab40309.git |            0 |      |
++-----+---------------+----------------------------------------------+--------------+------+
+Note: Use --out=json or --out=yaml to get more resource details.
